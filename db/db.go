@@ -13,7 +13,8 @@ const MAX_IDLE_CONNECTIONS = 5
 var DB *sql.DB
 
 func InitDB() {
-	DB, err := sql.Open("sqlite3", "api.db")
+	var err error
+	DB, err = sql.Open("sqlite3", "api.db")
 
 	if err != nil {
 		log.Fatalln("ERROR: cannot initialize the database")
