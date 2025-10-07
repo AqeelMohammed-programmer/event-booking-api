@@ -26,6 +26,8 @@ func (e *Event) Save() error {
 		return err
 	}
 
+	defer stmt.Close()
+
 	result, err := stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.UserId)
 	if err != nil {
 		return err
