@@ -1,9 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/AqeelMohammed-programmer/event-booking-api/db"
+)
 
 type Event struct {
-	ID          int
+	ID          int64
 	Name        string    `binding:"required"`
 	Description string    `binding:"required"`
 	Location    string    `binding:"required"`
@@ -13,9 +17,22 @@ type Event struct {
 
 var events []Event = []Event{}
 
-func (e Event) Save() {
-	// Later: add the event to a database
-	events = append(events, e)
+func (e *Event) Save() error {
+	query := `INSERT INTO events(name, description, location, dateTime, user_id)
+	VALUES(?, ?, ?, ?, ?)`
+
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	result, err := stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.UserId)
+	if err != nil {
+		return err
+	}
+
+	e.ID, err = result.LastInsertId()
+	return err
 }
 
 func GetAllEvents() []Event {
