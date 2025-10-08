@@ -19,7 +19,13 @@ func main() {
 }
 
 func getEvents(context *gin.Context) {
-	events := models.GetAllEvents()
+	events, err := models.GetAllEvents()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "cannot fetch the events, try again later!",
+		})
+		return
+	}
 	context.JSON(http.StatusOK, gin.H{
 		"events": events,
 	})
@@ -34,11 +40,15 @@ func createEvent(context *gin.Context) {
 			"message": "Could not parse requested date",
 		})
 	}
-
-	event.ID = 1
 	event.UserId = 1
 
-	event.Save()
+	err = event.Save()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "cannot create an event, try again leter!",
+		})
+		return
+	}
 
 	context.JSON(http.StatusCreated, gin.H{
 		"message": "Event created!", "event": event,

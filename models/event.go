@@ -37,6 +37,26 @@ func (e *Event) Save() error {
 	return err
 }
 
-func GetAllEvents() []Event {
-	return events
+func GetAllEvents() ([]Event, error) {
+	query := `SELECT * FROM events`
+
+	result, err := db.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	var events []Event
+
+	for result.Next() {
+		var event Event
+
+		err := result.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserId)
+		if err != nil {
+			return nil, err
+		}
+
+		events = append(events, event)
+	}
+
+	return events, nil
 }
