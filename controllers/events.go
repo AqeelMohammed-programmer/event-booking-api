@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/AqeelMohammed-programmer/event-booking-api/models"
+	"github.com/AqeelMohammed-programmer/event-booking-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,8 +50,25 @@ func GetEvents(context *gin.Context) {
 }
 
 func CreateEvent(context *gin.Context) {
+	token := context.Request.Header.Get("Authorization")
+
+	if token == "" {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"message": "user unauthorized!",
+		})
+		return
+	}
+
+	userId, err := utils.VerifyToken(token)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"message": "invalid token",
+		})
+		return
+	}
+
 	var event models.Event
-	err := context.ShouldBindJSON(&event)
+	err = context.ShouldBindJSON(&event)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
@@ -58,7 +76,7 @@ func CreateEvent(context *gin.Context) {
 		})
 		return
 	}
-	event.UserId = 1
+	event.UserId = userId
 
 	err = event.Save()
 	if err != nil {
