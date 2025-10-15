@@ -31,3 +31,24 @@ func SignUp(context *gin.Context) {
 		"message": "user created!",
 	})
 }
+
+func Login(context *gin.Context) {
+	var user models.User
+
+	err := context.ShouldBindJSON(&user)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Could not parse requested date",
+		})
+		return
+	}
+
+	err = user.ValidateCredentials()
+
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "invalid credetials!"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Login successful!"})
+}
