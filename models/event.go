@@ -114,7 +114,7 @@ func (e *Event) Delete() error {
 	return err
 }
 
-func (u *Event) Register(userId int64) error {
+func (e *Event) Register(userId int64) error {
 	query := "INSERT INTO registrations(event_id, user_id) VALUES(?, ?)"
 
 	stmt, err := db.DB.Prepare(query)
@@ -125,7 +125,38 @@ func (u *Event) Register(userId int64) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(u.ID, userId)
+	_, err = stmt.Exec(e.ID, userId)
 
 	return err
+}
+
+func (e *Event) CancelRegistration(userId int64) error {
+	query := "DELETE FROM registrations WHERE event_id = ? AND user_id = ?"
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.ID, userId)
+
+	return err
+}
+
+func (e *Event) IsRegistered(userId int64) bool {
+	query := "SELECT 1 FROM registrations WHERE event_id = ? AND user_id = ? LIMIT 1"
+
+	var exists int
+	err := db.DB.QueryRow(query, e.ID, userId).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		}
+		return false
+	}
+
+	return true
 }
