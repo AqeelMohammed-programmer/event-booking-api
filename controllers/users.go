@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/AqeelMohammed-programmer/event-booking-api/models"
+	"github.com/AqeelMohammed-programmer/event-booking-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,5 +51,14 @@ func Login(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Login successful!"})
+	token, err := utils.GenerateJWT(user.Email, user.ID)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "somthing went wrong",
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Login successful!", "token": token})
 }
