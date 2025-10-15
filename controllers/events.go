@@ -99,6 +99,13 @@ func UpdateEvent(context *gin.Context) {
 		return
 	}
 
+	userId := context.GetInt64("userId")
+
+	if event.UserId != userId {
+		context.JSON(http.StatusForbidden, gin.H{"message": "user can only update his events!"})
+		return
+	}
+
 	var updatedEvent models.Event
 	err = context.ShouldBindJSON(&updatedEvent)
 
@@ -145,6 +152,13 @@ func DeleteEvent(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{
 			"message": "event not found.",
 		})
+		return
+	}
+
+	userId := context.GetInt64("userId")
+
+	if event.UserId != userId {
+		context.JSON(http.StatusForbidden, gin.H{"message": "user can only delete his events!"})
 		return
 	}
 
