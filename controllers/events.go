@@ -56,8 +56,11 @@ func CreateEvent(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "Could not parse requested date",
 		})
+		return
 	}
-	event.UserId = 1
+
+	userId := context.GetInt64("userId")
+	event.UserId = userId
 
 	err = event.Save()
 	if err != nil {
@@ -93,6 +96,13 @@ func UpdateEvent(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{
 			"message": "event not found.",
 		})
+		return
+	}
+
+	userId := context.GetInt64("userId")
+
+	if event.UserId != userId {
+		context.JSON(http.StatusForbidden, gin.H{"message": "user can only update his events!"})
 		return
 	}
 
@@ -142,6 +152,13 @@ func DeleteEvent(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{
 			"message": "event not found.",
 		})
+		return
+	}
+
+	userId := context.GetInt64("userId")
+
+	if event.UserId != userId {
+		context.JSON(http.StatusForbidden, gin.H{"message": "user can only delete his events!"})
 		return
 	}
 
